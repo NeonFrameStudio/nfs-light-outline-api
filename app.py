@@ -55,17 +55,24 @@ async def preview(file: UploadFile = File(...)):
     for c in contours:
         area = cv2.contourArea(c)
 
-        # ignore tiny junk
         if area < 150:
             continue
 
         x, y, cw, ch = cv2.boundingRect(c)
 
-        # ignore huge weird regions
         if area > (w * h) * 0.2:
             continue
 
-        # draw the taillight outline
+        cx = x + (cw / 2)
+
+        # only keep contours on outer left / outer right
+        if not (cx < w * 0.35 or cx > w * 0.65):
+            continue
+
+        # ignore tiny flat junk
+        if cw < 12 or ch < 12:
+            continue
+
         cv2.drawContours(overlay, [c], -1, (0, 0, 255), 3)
 
     # soft glow from the outline only
